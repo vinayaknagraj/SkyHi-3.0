@@ -1,6 +1,3 @@
- 
-
-
 //
 //  ViewController.swift
 //  Custom-Pin-View
@@ -11,6 +8,10 @@
 import UIKit
 import MapKit
 import CoreLocation
+
+class CustomPointAnnotation: MKPointAnnotation {
+    var imageName: String!
+}
 
 class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
     
@@ -40,69 +41,57 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         // Do any additional setup after loading the view.
     }
     
-    private func addCustomPin(){
-        let pin1 = MKPointAnnotation()
-        pin1.coordinate = coordinate1
-        pin1.title = "Smart Punk"
-        pin1.subtitle = "Collect Them"
-        let pin2 = MKPointAnnotation()
-        pin2.coordinate = coordinate2
-        pin2.title = "TPunk"
-        pin2.subtitle = "Collect Them"
-        let pin3 = MKPointAnnotation()
-        pin3.coordinate = coordinate3
-        pin3.title = "Merge"
-        pin3.subtitle = "Collect Them"
-        let pin4 = MKPointAnnotation()
-        pin4.coordinate = coordinate4
-        pin4.title = "CryptoPunk #5822"
-        pin4.subtitle = "Collect Them"
-        let pin5 = MKPointAnnotation()
-        pin5.coordinate = coordinate5
-        pin5.title = "Beeple’s HUMAN ONE"
-        pin5.subtitle = "Collect Them"
+    private func addCustomPin() {
+        let pin1 = createCustomAnnotation(title: "Smart Punk", subtitle: "Collect Them", coordinate: coordinate1, imageName: "image1")
+        let pin2 = createCustomAnnotation(title: "TPunk", subtitle: "Collect Them", coordinate: coordinate2, imageName: "image2")
+        let pin3 = createCustomAnnotation(title: "Merge", subtitle: "Collect Them", coordinate: coordinate3, imageName: "image3")
+        let pin4 = createCustomAnnotation(title: "CryptoPunk #5822", subtitle: "Collect Them", coordinate: coordinate4, imageName: "image4")
+        let pin5 = createCustomAnnotation(title: "Beeple’s HUMAN ONE", subtitle: "Collect Them", coordinate: coordinate5, imageName: "image5")
 
         map.addAnnotations([pin1, pin2, pin3, pin4, pin5])
-         
-        
-        
-        
     }
-    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView?
-    {
-        guard !(annotation is MKUserLocation) else{
+
+    
+    private func createCustomAnnotation(title: String, subtitle: String, coordinate: CLLocationCoordinate2D, imageName: String) -> CustomPointAnnotation {
+            let annotation = CustomPointAnnotation()
+            annotation.title = title
+            annotation.subtitle = subtitle
+            annotation.coordinate = coordinate
+            annotation.imageName = imageName
+            return annotation
+        }
+    
+    
+    
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        guard !(annotation is MKUserLocation),
+              let customAnnotation = annotation as? CustomPointAnnotation else {
             return nil
         }
-        var annotationView =  map.dequeueReusableAnnotationView(withIdentifier: "custom")
+        var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "custom")
         
-        if annotationView == nil{
+        if annotationView == nil {
             annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "custom")
             annotationView?.canShowCallout = true
             let button = UIButton(type: .roundedRect)
             annotationView?.rightCalloutAccessoryView = button
             button.setTitle("View", for: .normal)
             button.frame = CGRect(x: 100, y: 0, width: 50, height: 40)
-            button.addTarget(self,action: #selector(buttonTapped), for: .touchUpInside)
-            view.addSubview(button)
-            
-            
-        }
-        else{
+            button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+        } else {
             annotationView?.annotation = annotation
         }
-        annotationView?.image = UIImage(named: "Image")
-        
+        annotationView?.image = UIImage(named: customAnnotation.imageName)
         
         return annotationView
     }
-    
 
-   
-        @objc func buttonTapped() {
-           
-            let vc = (storyboard?.instantiateViewController(withIdentifier: "NextViewController"))!
-            navigationController?.pushViewController(vc,animated: true)
-        }
+
+    
+    @objc func buttonTapped() {
+        let vc = (storyboard?.instantiateViewController(withIdentifier: "NextViewController"))!
+        navigationController?.pushViewController(vc, animated: true)
+    }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.last {
@@ -110,15 +99,5 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             mapView.setRegion(region, animated: true)
         }
     }
-
-
-
-
-        }
-        
-        
-        
-    
-
-    
+}
 
